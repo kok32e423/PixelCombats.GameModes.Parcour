@@ -211,7 +211,7 @@ function SetPlayerSpawn(player, index) {
 
 room.NewGameVote.OnResult.Add(v => {
 	if (v.Result === null) return;
-	NewGame.RestartGame(v.Result);
+	room.NewGame.RestartGame(v.Result);
 }); // вынесено из функции, которая выполняется только на сервере, чтобы не зависало, если не отработает, также чтобы не давало баг, если вызван метод 2 раза и появилось 2 подписки
 
 function start_vote() {
