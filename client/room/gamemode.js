@@ -210,7 +210,7 @@ room.NewGameVote.OnResult.Add(v => {
 }); // вынесено из функции, которая выполняется только на сервере, чтобы не зависало, если не отработает, также чтобы не давало баг, если вызван метод 2 раза и появилось 2 подписки
 
 function start_vote() {
-	NewGameVote.Start({
+	room.NewGameVote.Start({
 		Variants: [{ MapId: 0 }],
 		Timer: VOTE_TIME
 	}, MAP_ROTATION ? 3 : 0);
