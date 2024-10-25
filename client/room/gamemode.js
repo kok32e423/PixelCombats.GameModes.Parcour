@@ -4,6 +4,7 @@ import * as room from 'pixel_combats/room';
 import * as teams from './default_teams.js';
 
 // опции
+const END_OF_MATCH_TIME = 10;
 const VOTE_TIME = 20;
 
 // константы
@@ -19,6 +20,7 @@ const MaxSpawnsByArea = 25;	// макс спавнов на зону
 const LeaderBoardProp = "Leader"; // свойство для лидерборда
 
 // постоянные переменные
+const mainTimer = room.Timers.GetContext().Get("Main"); 		// таймер конца игры
 var endAreas = room.AreaService.GetByTag(EndAreaTag);		// зоны конца игры
 var spawnAreas = room.AreaService.GetByTag(SpawnAreasTag);	// зоны спавнов
 const stateProp = room.Properties.GetContext().Get("State");	// свойство состояния
@@ -61,7 +63,7 @@ function OnState() {
 			spawnsRoomContext.enable = false;
 			spawnsRoomContext.Despawn();
 			room.Game.GameOver(room.LeaderBoard.GetPlayers());
-			start_vote();
+			mainTimer.Restart(END_OF_MATCH_TIME);
 			// говорим кто победил
 			break;
 	}
@@ -114,6 +116,9 @@ spawnTrigger.OnEnter.Add(function (player, area) {
 		}
 	}
 });
+
+// настраиваем таймер конца игры
+mainTimer.OnTimer.Add(function () { start_vote(); });
 
 // создаем лидерборд
 room.LeaderBoard.PlayerLeaderBoardValues = [
