@@ -32,7 +32,7 @@ const areaColor = new basic.Color(1, 1, 1, 0);	// цвет зоны
 const MAP_ROTATION = room.GameMode.Parameters.GetBool("MapRotation");
 room.Properties.GetContext().GameModeName.Value = "GameModes/Parcour";
 room.Damage.FriendlyFire = false;
-room.Map.Rotation = MAP_ROTATION;
+//room.Map.Rotation = MAP_ROTATION;
 room.BreackGraph.OnlyPlayerBlocksDmg = room.GameMode.Parameters.GetBool("PartialDesruction");
 room.BreackGraph.WeakBlocks = room.GameMode.Parameters.GetBool("LoosenBlocks");
 
@@ -46,6 +46,20 @@ inventory.Build.Value = false;
 // создаем команду
 const blueTeam = teams.create_team_blue();
 blueTeam.Spawns.RespawnTime.Value = 0;
+
+// настройка голосования
+function OnVoteResult(v) {
+	if (v.Result === null) return;
+	room.NewGame.RestartGame(v.Result);
+}
+room.NewGameVote.OnResult.Add(OnVoteResult); // вынесено из функции, которая выполняется только на сервере, чтобы не зависало, если не отработает, также чтобы не давало баг, если вызван метод 2 раза и появилось 2 подписки
+
+function start_vote() {
+	room.NewGameVote.Start({
+		Variants: [{ MapId: 0 }],
+		Timer: VOTE_TIME
+	}, MAP_ROTATION ? 3 : 0);
+}
 
 // вывод подсказки
 room.Ui.GetContext().Hint.Value = "Hint/GoParcour";
@@ -208,18 +222,6 @@ function SetPlayerSpawn(player, index) {
 			++spawnsCount;
 			if (spawnsCount > MaxSpawnsByArea) return;
 		}
-}
-
-room.NewGameVote.OnResult.Add(v => {
-	if (v.Result === null) return;
-	room.NewGame.RestartGame(v.Result);
-}); // вынесено из функции, которая выполняется только на сервере, чтобы не зависало, если не отработает, также чтобы не давало баг, если вызван метод 2 раза и появилось 2 подписки
-
-function start_vote() {
-	room.NewGameVote.Start({
-		Variants: [{ MapId: 0 }],
-		Timer: VOTE_TIME
-	}, MAP_ROTATION ? 3 : 0);
 }
 
 // запуск игры
