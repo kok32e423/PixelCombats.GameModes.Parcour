@@ -64,6 +64,7 @@ function OnState() {
 			spawnsRoomContext.Despawn();
 			room.Game.GameOver(room.LeaderBoard.GetPlayers());
 			mainTimer.Restart(END_OF_MATCH_TIME);
+			room.Ui.GetContext().MainTimerId.Value = mainTimer.Id;
 			// говорим кто победил
 			break;
 	}
