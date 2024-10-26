@@ -4,7 +4,8 @@ import * as room from 'pixel_combats/room';
 import * as teams from './default_teams.js';
 
 // опции
-const EndOfMatchTime = 10;
+const END_OF_MATCH_TIME = 10;
+const VOTE_TIME = 20;
 
 // константы
 const GameStateValue = "Game";
@@ -24,13 +25,14 @@ var endAreas = room.AreaService.GetByTag(EndAreaTag);		// зоны конца и
 var spawnAreas = room.AreaService.GetByTag(SpawnAreasTag);	// зоны спавнов
 const stateProp = room.Properties.GetContext().Get("State");	// свойство состояния
 const inventory = room.Inventory.GetContext();				// контекст инвентаря
-const gnmeEndAreaColor = new basic.Color(0, 0, 1, 0);	// цвет зоны конца маршрута
+const gameEndAreaColor = new basic.Color(0, 0, 1, 0);	// цвет зоны конца маршрута
 const areaColor = new basic.Color(1, 1, 1, 0);	// цвет зоны
 
 // параметры режима
+const MAP_ROTATION = room.GameMode.Parameters.GetBool("MapRotation");
 room.Properties.GetContext().GameModeName.Value = "GameModes/Parcour";
 room.Damage.FriendlyFire = false;
-Map.Rotation = room.GameMode.Parameters.GetBool("MapRotation");
+//room.Map.Rotation = MAP_ROTATION;
 room.BreackGraph.OnlyPlayerBlocksDmg = room.GameMode.Parameters.GetBool("PartialDesruction");
 room.BreackGraph.WeakBlocks = room.GameMode.Parameters.GetBool("LoosenBlocks");
 
@@ -44,6 +46,20 @@ inventory.Build.Value = false;
 // создаем команду
 const blueTeam = teams.create_team_blue();
 blueTeam.Spawns.RespawnTime.Value = 0;
+
+// настройка голосования
+function OnVoteResult(v) {
+	if (v.Result === null) return;
+	room.NewGame.RestartGame(v.Result);
+}
+room.NewGameVote.OnResult.Add(OnVoteResult); // вынесено из функции, которая выполняется только на сервере, чтобы не зависало, если не отработает, также чтобы не давало баг, если вызван метод 2 раза и появилось 2 подписки
+
+function start_vote() {
+	room.NewGameVote.Start({
+		Variants: [{ MapId: 0 }],
+		Timer: VOTE_TIME
+	}, MAP_ROTATION ? 3 : 0);
+}
 
 // вывод подсказки
 room.Ui.GetContext().Hint.Value = "Hint/GoParcour";
@@ -61,7 +77,8 @@ function OnState() {
 			spawnsRoomContext.enable = false;
 			spawnsRoomContext.Despawn();
 			room.Game.GameOver(room.LeaderBoard.GetPlayers());
-			mainTimer.Restart(EndOfMatchTime);
+			mainTimer.Restart(END_OF_MATCH_TIME);
+			room.Ui.GetContext().MainTimerId.Value = mainTimer.Id;
 			// говорим кто победил
 			break;
 	}
@@ -70,7 +87,7 @@ function OnState() {
 // визуализируем конец маршрута
 if (room.GameMode.Parameters.GetBool(ViewEndParameterName)) {
 	var endView = room.AreaViewService.GetContext().Get("EndView");
-	endView.Color = gnmeEndAreaColor;
+	endView.Color = gameEndAreaColor;
 	endView.Tags = [EndAreaTag];
 	endView.Enable = true;
 }
@@ -89,7 +106,7 @@ endTrigger.Tags = [EndAreaTag];
 endTrigger.Enable = true;
 endTrigger.OnEnter.Add(function (player) {
 	endTrigger.Enable = false;
-	player.Properties.Get(LeaderBoardProp).Value += 1000;
+	player.Properties.Get(LeaderBoardProp).Value += EndTriggerPoints;
 	stateProp.Value = EndOfMatchStateValue;
 });
 
@@ -116,7 +133,7 @@ spawnTrigger.OnEnter.Add(function (player, area) {
 });
 
 // настраиваем таймер конца игры
-mainTimer.OnTimer.Add(function () { room.Game.RestartGame(); });
+mainTimer.OnTimer.Add(function () { start_vote(); });
 
 // создаем лидерборд
 room.LeaderBoard.PlayerLeaderBoardValues = [

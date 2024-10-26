@@ -38,6 +38,11 @@
         "Name": "ViewSpawns",
         "DisplayName": "GmParams/ViewSpawns",
         "Default": true
+      },
+      {
+        "Name": "MapRotation",
+        "DisplayName": "GmParams/MapRotation",
+        "Default": true
       }
     ]
   }
