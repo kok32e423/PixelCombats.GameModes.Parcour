@@ -209,7 +209,7 @@ function SetPlayerSpawn(player, index) {
         const position = player.Position,
              rotation = player.Position;
         	
-        spawns.CustomSpawnPoints.Add(position.x, position.y, position.z, room.Spawns.GetSpawnRotation(position.x, position.z, rotation.y, rotation.x));
+        spawns.CustomSpawnPoints.Add(position.x + 2, position.y, position.z + 2, room.Spawns.GetSpawnRotation(position.x, position.z, rotation.y, rotation.x));
         ++spawnsCount;
         
         player.Properties.Scores.Value += 1;
