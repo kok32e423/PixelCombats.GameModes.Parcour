@@ -203,20 +203,16 @@ function SetPlayerSpawn(player, index) {
         spawns.CustomSpawnPoints.Clear();
         // если нет захвата то сброс спавнов
         if (index < 0 || index >= spawnAreas.length) return;
-        // определяем куда смотреть спавнам
-        var lookPoint = {};
-        if (index < spawnAreas.length - 1) lookPoint = spawnAreas[index + 1].Ranges.GetAveragePosition();
-        else {
-                if (endAreas.length > 0)
-                        lookPoint = endAreas[0].Ranges.GetAveragePosition();
-        }
 
         //log.debug("range=" + range);
         var spawnsCount = 0;
-        const coordinates = player.Position;
+        const position = player.Position,
+             rotation = player.Position;
         	
-        spawns.CustomSpawnPoints.Add(coordinates.x, coordinates.y, coordinates.z, room.Spawns.GetSpawnRotation(coordinates.x, coordinates.z, lookPoint.x, lookPoint.z));
+        spawns.CustomSpawnPoints.Add(position.x, position.y, position.z, room.Spawns.GetSpawnRotation(position.x, position.z, rotation.y, rotation.x));
         ++spawnsCount;
+        
+        player.Properties.Scores.Value += 1;
         if (spawnsCount > MaxSpawnsByArea) return;
 }
 
